@@ -96,7 +96,7 @@ app.get("/", (req, res) => {
             <body>
                 <article class="markdown-body">
 			${marked.parse("# Alims blog on very important stuff \n " + 
-				files.map(file => ` - [${file.replace(".md", "") }](/${file})`).join("\n")
+				files.map(file => ` - [${file.replace(".md", "").replaceAll("_", " ") }](/${file})`).join("\n")
 			)}
 		</article>
             </body>
