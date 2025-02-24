@@ -5,8 +5,38 @@ const marked = require("marked");
 const hljs = require("highlight.js");
 const katex = require("katex");
 
+const {exec} = require("child_process");
+
+const basic_auth = require("basic-auth");
+
+require("dotenv").config();
+
 const app = express();
 app.use(express.static("public")); // Serve static files like CSS
+
+
+const USERNAME = process.env.USERNAME;
+const PASSWORD = process.env.PASSWORD;
+
+// Middleware for Basic Authentication
+const authMiddleware = (req, res, next) => {
+    const credentials = basic_auth(req);
+
+	console.log(req.path);
+
+	if(req.path != "/admin"){
+		return next()
+	}
+
+    if (!credentials || credentials.name !== USERNAME || credentials.pass !== PASSWORD) {
+        res.set("WWW-Authenticate", 'Basic realm="Login Required"');
+        return res.status(401).send("Unauthorized");
+    }
+    
+    next(); // Continue to the requested route if authentication is successful
+};
+
+app.use(authMiddleware)
 
 // Configure marked
 marked.setOptions({
@@ -28,6 +58,14 @@ renderer.paragraph = ({text}) => {
 };
 
 marked.use({ renderer });
+
+app.get("/admin", (req, res) => {
+
+
+	exec("./restart-server.sh")
+
+	res.send("server is reloading!")
+})
 
 
 
